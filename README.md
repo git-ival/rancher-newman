@@ -18,4 +18,5 @@ This is a collection of convenience scripts written in `bash` or `nodejs` utiliz
 
 ### Setup
 1. Navigate to the `rancher-newman/` root directory
-2. Run `npm install`
+2. Install [LTS](https://confluence.suse.com/display/RANQA/Postman) version of node
+3. Run `npm install`
