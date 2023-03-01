@@ -1,0 +1,234 @@
+{
+	"info": {
+		"_postman_id": "557f1a74-39cd-4336-9b6d-74c5bc2b23ac",
+		"name": "Rancher - Get Machine Keys",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "25921612"
+	},
+	"item": [
+		{
+			"name": "Login",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"protocolProfileBehavior": {
+				"disabledSystemHeaders": {
+					"accept": true
+				}
+			},
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Accept",
+						"value": "application/json",
+						"type": "default"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"description\": \"Postman session\",\r\n    \"password\": \"{{PASSWORD}}\",\r\n    \"responseType\": \"cookie\",\r\n    \"username\": \"{{USERNAME}}\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{URL}}/v3-public/localProviders/local?action=login",
+					"host": [
+						"{{URL}}"
+					],
+					"path": [
+						"v3-public",
+						"localProviders",
+						"local"
+					],
+					"query": [
+						{
+							"key": "action",
+							"value": "login"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Mgmt Cluster Nodes",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"pm.environment.unset(\"MACHINE_NAMES\");\r",
+							"let temp = [];\r",
+							"let jsonData = pm.response.json();\r",
+							"\r",
+							"jsonData.items.forEach((item) => {\r",
+							"    console.log(item.metadata.name)\r",
+							"    console.log(temp);\r",
+							"    // temp.push(pm.environment.get(\"CLUSTER_ID\").concat(\":\", item.metadata.name));\r",
+							"    temp.push(item.metadata.name);\r",
+							"})\r",
+							"pm.environment.set(\"MACHINE_NAMES\", temp);\r",
+							"console.log(\"This is MACHINE_NAMES: \", pm.environment.get(\"MACHINE_NAMES\"));\r",
+							"console.log(Array.isArray(pm.environment.get(\"MACHINE_NAMES\")));\r",
+							"\r",
+							"pm.test(\"MACHINE_NAMES isArray\", function () {\r",
+							"    pm.expect(pm.environment.get(\"MACHINE_NAMES\")).to.be.an(\"array\");\r",
+							"});\r",
+							"\r",
+							"pm.test(\"MACHINE_NAMES length > 0\", function () {\r",
+							"    pm.expect(pm.environment.get(\"MACHINE_NAMES\")).to.have.length.greaterThan(0);\r",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "authority",
+						"value": "ival-ocelot-rke1.qa.rancher.space",
+						"disabled": true
+					},
+					{
+						"key": "accept",
+						"value": "application/json"
+					},
+					{
+						"key": "accept-language",
+						"value": "en-US,en;q=0.9",
+						"disabled": true
+					},
+					{
+						"key": "dnt",
+						"value": "1"
+					}
+				],
+				"url": {
+					"raw": "{{URL}}/apis/management.cattle.io/v3/namespaces/{{CLUSTER_ID}}/nodes",
+					"host": [
+						"{{URL}}"
+					],
+					"path": [
+						"apis",
+						"management.cattle.io",
+						"v3",
+						"namespaces",
+						"{{CLUSTER_ID}}",
+						"nodes"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Machine Keys",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"const names = pm.environment.get(\"MACHINE_NAMES\");\r",
+							"\r",
+							"console.log(pm.environment.get('MACHINE_NAMES_INDEX'));\r",
+							"\r",
+							"let index = Number(pm.environment.get('MACHINE_NAMES_INDEX')); //Parse from string to Integer\r",
+							"\r",
+							"console.log(\"The value of the index is \" + index);\r",
+							"\r",
+							"console.log(\"Entry of array: \" + names[index]);\r",
+							"\r",
+							"pm.environment.set(\"MACHINE_NAME\", names[index]);\r",
+							"\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"const namesLength = pm.environment.get(\"MACHINE_NAMES\").length - 1;\r",
+							"\r",
+							"let index = Number(pm.environment.get('MACHINE_NAMES_INDEX')); //Parse from string to Integer\r",
+							"\r",
+							"if (index < namesLength) {\r",
+							"    pm.environment.set('MACHINE_NAMES_INDEX', index + 1);\r",
+							"    postman.setNextRequest(\"Machine Keys\");\r",
+							"}\r",
+							"else {\r",
+							"    pm.environment.set('MACHINE_NAMES_INDEX', 0);\r",
+							"}\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{URL}}/v3/nodes/{{CLUSTER_ID}}:{{MACHINE_NAME}}/nodeconfig",
+					"host": [
+						"{{URL}}"
+					],
+					"path": [
+						"v3",
+						"nodes",
+						"{{CLUSTER_ID}}:{{MACHINE_NAME}}",
+						"nodeconfig"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Nodes Info",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{URL}}/apis/management.cattle.io/v3/namespaces/{{CLUSTER_ID}}/nodes/",
+					"host": [
+						"{{URL}}"
+					],
+					"path": [
+						"apis",
+						"management.cattle.io",
+						"v3",
+						"namespaces",
+						"{{CLUSTER_ID}}",
+						"nodes",
+						""
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}

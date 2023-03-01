@@ -1,0 +1,6 @@
+node_modules/
+package-lock.json
+*.json
+!*postman_collection.json
+!*postman_environment.json
+!package.json
